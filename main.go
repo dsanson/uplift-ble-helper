@@ -21,6 +21,8 @@ var (
 	response           = bluetooth.New16BitUUID(0xfe62) // 0000fe62-0000-1000-8000-00805f9b34fb
 	commandRaise       = makeCommand(1)                 // []byte{241, 241, 1, 0, 1, 126}
 	commandLower       = makeCommand(2)                 // []byte{241, 241, 2, 0, 2, 126}
+	commandSetPreset1  = makeCommand(3)                 // []byte{241, 241, 7, 0, 7, 126}
+	commandSetPreset2  = makeCommand(4)                 // []byte{241, 241, 7, 0, 7, 126}
 	commandGoToPreset1 = makeCommand(5)                 // []byte{241, 241, 5, 0, 5, 126}
 	commandGoToPreset2 = makeCommand(6)                 // []byte{241, 241, 6, 0, 6, 126}
 	commandStatus      = makeCommand(7)                 // []byte{241, 241, 7, 0, 7, 126}
@@ -284,6 +286,8 @@ func cli(desk *desk, c *config) {
 	fmt.Println("  2 - go to preset 2")
 	fmt.Println("  r - raise the desk a bit")
 	fmt.Println("  l - lower the desk a bit")
+	fmt.Println("  s - set preset1 to current height")
+	fmt.Println("  S - set preset2 to current height")
 
 	for command := range stdin {
 		switch command {
@@ -295,6 +299,10 @@ func cli(desk *desk, c *config) {
 			desk.command.WriteWithoutResponse(commandRaise)
 		case "l":
 			desk.command.WriteWithoutResponse(commandLower)
+        case "s":
+			desk.command.WriteWithoutResponse(commandSetPreset1)
+        case "S":
+			desk.command.WriteWithoutResponse(commandSetPreset2)
 		default:
 			// Enter raw commands in the form of comma-delimited decimal notations
 			// Go to preset 1 by typing this and then enter
@@ -378,19 +386,19 @@ func handleResponse(buf []byte, desk *desk) (wasHeightChange bool) {
 		}
 	case 37:
 		if len(params) == 2 {
-			desk.preset1 = decodeHeight(params)
+			desk.preset2 = decodeHeight(params)
 		}
 	case 38:
 		if len(params) == 2 {
-			desk.preset2 = decodeHeight(params)
+			desk.preset3 = decodeHeight(params)
 		}
 	case 39:
 		if len(params) == 2 {
-			desk.preset3 = decodeHeight(params)
+			desk.preset4 = decodeHeight(params)
 		}
 	case 40:
 		if len(params) == 2 {
-			desk.preset4 = decodeHeight(params)
+			desk.preset1 = decodeHeight(params)
 		}
 	default:
 		fmt.Println("Unknown response:", command, params)
